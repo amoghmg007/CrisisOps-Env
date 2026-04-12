@@ -24,13 +24,20 @@ from rich.panel import Panel
 console = Console()
 
 def log_start(task: str, env: str, model: str) -> None:
+    print(f"[START] task={task} env={env} model={model}", flush=True)
     console.print(f"\n[bold cyan]>> STARTING TASK:[/bold cyan] [yellow]{task}[/yellow] | Model: [green]{model}[/green]")
 
 def log_step(step: int, action: str, reward: float, done: bool, error: str = None, reasoning: str = None) -> None:
+    error_val = error if error else "null"
+    done_val = str(done).lower()
+    print(f"[STEP] step={step} action={action} reward={reward:.2f} done={done_val} error={error_val}", flush=True)
     status = "[red]Done[/red]" if done else "[green]Active[/green]"
     err_text = f" | [red]Err: {error}[/red]" if error else ""
     reason_text = f"\n  [dim italic]Reasoning: {reasoning}[/dim italic]" if reasoning else ""
     console.print(f"  [cyan]Step {step:02d}[/cyan] | Action: [bold yellow]{action}[/bold yellow] | Integrity: [bold blue]{reward:.2f}[/bold blue] | {status}{err_text}{reason_text}")
+
+def log_end(task: str, score: float, steps: int) -> None:
+    print(f"[END] task={task} score={score:.2f} steps={steps}", flush=True)
 
 class DefWrapper(BaseModel):
     reasoning: str
@@ -106,8 +113,9 @@ Note: The environment contains a rule-based deterministic attacker. Threats buil
         act_str = f"Action(def='{def_move.value}')"
         log_step(step, act_str, reward, done, error_val, reasoning_str)
     
-    
-    return {"score": getattr(env, f"grade_{task_name}")(), "metrics": env.get_grade_breakdown(task=task_name)}, history
+    res_dict = {"score": getattr(env, f"grade_{task_name}")(), "metrics": env.get_grade_breakdown(task=task_name)}
+    log_end(task=f"{task_name}_{defender_type}", score=res_dict["score"], steps=env.step_count)
+    return res_dict, history
 
 async def main():
     tasks = ["recon", "defense", "recovery"]
