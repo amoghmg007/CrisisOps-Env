@@ -26,4 +26,26 @@ class BaselineDefender:
                 if obs.budget >= 2 and obs.system_integrity < 0.7:
                     return DefenderMove.allocate
                 return DefenderMove.scan
+        elif self.mode == "expert":
+            # Rule-engine that almost perfectly balances budget depending on task
+            if obs.task == "recon":
+                # Maximize visibility
+                if obs.budget >= 1 and (obs.visible_threat_level is None or step % 2 == 0):
+                    return DefenderMove.scan
+                return DefenderMove.defend
+            elif obs.task == "defense":
+                # Maximize integrity, defend frequently
+                if obs.visible_threat_level is None: return DefenderMove.scan
+                if obs.budget >= 1 and obs.visible_threat_level > 0.5:
+                    return DefenderMove.defend
+                if obs.budget >= 2 and obs.system_integrity < 0.6:
+                    return DefenderMove.allocate
+                return DefenderMove.scan
+            elif obs.task == "recovery":
+                # Emphasize allocate
+                if obs.budget >= 2 and obs.system_integrity < 0.8:
+                    return DefenderMove.allocate
+                if step % 3 == 0: return DefenderMove.scan
+                return DefenderMove.defend
+
         return DefenderMove.scan

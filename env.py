@@ -212,19 +212,25 @@ class CrisisOpsEnv:
     # score = A * metric1 + B * metric2
     # passed = score >= threshold
 
+    def _safe_score(self, score: float) -> float:
+        EPS = 1e-6
+        if score is None or score != score:
+            return 0.5
+        return max(EPS, min(score, 1 - EPS))
+
     def grade_recon(self) -> float:
         """Goal: Maximize threat visibility."""
         scan_ratio = self.scan_count / max(1, self.step_count)
         threat_discovery = sum(self.visible_threat_history)
         score = (0.6 * min(1.0, scan_ratio * 2.0)) + (0.4 * min(1.0, threat_discovery * 0.5))
-        return score
+        return self._safe_score(score)
 
     def grade_defense(self) -> float:
         """Goal: Maintain system integrity against attacks."""
         avg_integrity = sum(self.integrity_history) / len(self.integrity_history)
         defend_ratio = self.defend_count / max(1, self.step_count)
         score = (0.4 * avg_integrity) + (0.6 * min(1.0, defend_ratio * 1.5))
-        return score
+        return self._safe_score(score)
 
     def grade_recovery(self) -> float:
         """Goal: Restore system after damage."""
@@ -232,7 +238,7 @@ class CrisisOpsEnv:
         recovery_delta = self.system_integrity - min_integrity
         alloc_ratio = self.allocate_count / max(1, self.step_count)
         score = (0.6 * min(1.0, recovery_delta * 1.5)) + (0.4 * min(1.0, alloc_ratio * 2.0))
-        return score
+        return self._safe_score(score)
 
     def get_grade_breakdown(self, task: str = None) -> dict:
         """Returns details for transparent, deterministic evaluation."""

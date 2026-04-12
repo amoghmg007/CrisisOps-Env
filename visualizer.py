@@ -90,3 +90,44 @@ def plot_comparison(results_data, task_name):
     plt.savefig(filename)
     plt.close()
     return filename
+
+def plot_benchmark_summary(comparison_results, save_name="final_benchmark_summary"):
+    """
+    Creates a grouped bar chart for final scores of all agents across all tasks.
+    """
+    import numpy as np
+    os.makedirs(f"{os.path.dirname(__file__)}/plots", exist_ok=True)
+    
+    tasks = [res["task"].title() for res in comparison_results]
+    agents = ["random", "greedy", "expert", "llm"]
+    labels = ["Random", "Greedy", "Expert", "LLM Agent (Strategic)"]
+    colors = ["#EF4444", "#F59E0B", "#3B82F6", "#10B981"]
+    
+    x = np.arange(len(tasks))
+    width = 0.2
+    
+    fig, ax = plt.subplots(figsize=(10, 6))
+    fig.patch.set_facecolor('#1e1e2e')
+    ax.set_facecolor('#1e1e2e')
+    
+    for i, agent in enumerate(agents):
+        scores = [res[agent] for res in comparison_results]
+        ax.bar(x + i*width - width*1.5, scores, width, label=labels[i], color=colors[i], alpha=0.9)
+        
+    ax.set_ylabel('Validation Score (0.0 - 1.0)', color='white')
+    ax.set_title('CrisisOps Aggregate Validation Benchmarks', color='white', pad=20, fontsize=14)
+    ax.set_xticks(x)
+    ax.set_xticklabels(tasks, color='white')
+    ax.set_ylim(0, 1.05)
+    
+    ax.spines['bottom'].set_color('gray')
+    ax.spines['top'].set_visible(False)
+    ax.spines['left'].set_color('gray')
+    ax.spines['right'].set_visible(False)
+    ax.tick_params(colors='gray')
+    ax.grid(True, linestyle='--', alpha=0.2, axis='y')
+    ax.legend(facecolor='#2e2e3e', edgecolor='gray', labelcolor='white')
+    
+    plt.tight_layout()
+    plt.savefig(f"{os.path.dirname(__file__)}/plots/{save_name}.png")
+    plt.close()
