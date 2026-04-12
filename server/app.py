@@ -38,7 +38,7 @@ def get_tasks():
 
 @app.get("/grade")
 def get_grade(task: str = None):
-    valid_tasks = ["reconnaissance", "lateral_movement", "data_exfiltration", "incident_response"]
+    valid_tasks = ["recon", "defense", "recovery"]
     if task and task not in valid_tasks:
         return {"error": "invalid task"}
         
@@ -46,14 +46,12 @@ def get_grade(task: str = None):
     target_task = task or env_instance.task_level
     
     score = 0.0
-    if target_task == "reconnaissance":
-        score = env_instance.grade_reconnaissance()
-    elif target_task == "lateral_movement":
-        score = env_instance.grade_lateral_movement()
-    elif target_task == "data_exfiltration":
-        score = env_instance.grade_data_exfiltration()
-    elif target_task == "incident_response":
-        score = env_instance.grade_incident_response()
+    if target_task == "recon":
+        score = env_instance.grade_recon()
+    elif target_task == "defense":
+        score = env_instance.grade_defense()
+    elif target_task == "recovery":
+        score = env_instance.grade_recovery()
     
     return {
         "score": score,
@@ -64,21 +62,17 @@ def get_grade(task: str = None):
 def get_breakdown(task: str = None):
     return env_instance.get_grade_breakdown(task=task)
 
-@app.get("/grade_reconnaissance")
-def grade_reconnaissance_endpoint():
-    return {"score": env_instance.grade_reconnaissance()}
+@app.get("/grade_recon")
+def grade_recon_endpoint():
+    return {"score": env_instance.grade_recon()}
 
-@app.get("/grade_lateral_movement")
-def grade_lateral_movement_endpoint():
-    return {"score": env_instance.grade_lateral_movement()}
+@app.get("/grade_defense")
+def grade_defense_endpoint():
+    return {"score": env_instance.grade_defense()}
 
-@app.get("/grade_data_exfiltration")
-def grade_data_exfiltration_endpoint():
-    return {"score": env_instance.grade_data_exfiltration()}
-
-@app.get("/grade_incident_response")
-def grade_incident_response_endpoint():
-    return {"score": env_instance.grade_incident_response()}
+@app.get("/grade_recovery")
+def grade_recovery_endpoint():
+    return {"score": env_instance.grade_recovery()}
 
 def main():
     import uvicorn

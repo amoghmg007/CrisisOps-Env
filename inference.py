@@ -33,15 +33,13 @@ class DefWrapper(BaseModel):
 
 async def get_agent_move(prompt_sys, prompt_user, response_format, step):
     try:
-        if API_KEY == "dummy-key":
-            raise ValueError("Bypass API waiting")
         response = await client.beta.chat.completions.parse(
             model=MODEL_NAME,
             messages=[
                 {"role": "system", "content": prompt_sys},
                 {"role": "user", "content": f"Current State:\n{prompt_user}"}
             ],
-            response_format=schema,
+            response_format=response_format,
             temperature=0.7,
             max_tokens=60
         )
