@@ -5,6 +5,12 @@ from env import CrisisOpsEnv, Action
 app = FastAPI()
 env_instance = CrisisOpsEnv()
 
+def safe_score(score: float) -> float:
+    EPS = 1e-6
+    if score is None or score != score:  # handles NaN
+        return 0.5
+    return max(EPS, min(score, 1 - EPS))
+
 @app.get("/")
 def read_root():
     return {"status": "ok", "message": "CrisisOps Env Server Running"}
@@ -23,7 +29,7 @@ def step(action: Action):
     obs, reward, done, info = env_instance.step(action)
     return {
         "observation": obs.dict(),
-        "reward": reward,
+        "reward": safe_score(reward),
         "done": done,
         "info": info
     }
@@ -53,26 +59,42 @@ def get_grade(task: str = None):
     elif target_task == "recovery":
         score = env_instance.grade_recovery()
     
+    clamped_score = safe_score(score)
+    bd = env_instance.get_grade_breakdown(task=target_task)
+    if "score" in bd:
+        bd["score"] = safe_score(bd["score"])
+        
+    print("FINAL SCORE:", clamped_score)
+    
     return {
-        "score": score,
-        "breakdown": env_instance.get_grade_breakdown(task=target_task)
+        "score": clamped_score,
+        "breakdown": bd
     }
 
 @app.get("/breakdown")
 def get_breakdown(task: str = None):
-    return env_instance.get_grade_breakdown(task=task)
+    bd = env_instance.get_grade_breakdown(task=task)
+    if "score" in bd:
+        bd["score"] = safe_score(bd["score"])
+    return bd
 
 @app.get("/grade_recon")
 def grade_recon_endpoint():
-    return {"score": env_instance.grade_recon()}
+    sc = safe_score(env_instance.grade_recon())
+    print("FINAL SCORE:", sc)
+    return {"score": sc}
 
 @app.get("/grade_defense")
 def grade_defense_endpoint():
-    return {"score": env_instance.grade_defense()}
+    sc = safe_score(env_instance.grade_defense())
+    print("FINAL SCORE:", sc)
+    return {"score": sc}
 
 @app.get("/grade_recovery")
 def grade_recovery_endpoint():
-    return {"score": env_instance.grade_recovery()}
+    sc = safe_score(env_instance.grade_recovery())
+    print("FINAL SCORE:", sc)
+    return {"score": sc}
 
 def main():
     import uvicorn
