@@ -213,7 +213,7 @@ class CrisisOpsEnv:
     # passed = score >= threshold
 
     def _safe_score(self, score: float) -> float:
-        EPS = 1e-6
+        EPS = 0.001
         if score is None or score != score:
             return 0.5
         return max(EPS, min(score, 1 - EPS))
