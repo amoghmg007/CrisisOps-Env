@@ -37,7 +37,7 @@ def log_step(step: int, action: str, reward: float, done: bool, error: str = Non
     console.print(f"  [cyan]Step {step:02d}[/cyan] | Action: [bold yellow]{action}[/bold yellow] | Integrity: [bold blue]{reward:.2f}[/bold blue] | {status}{err_text}{reason_text}")
 
 def log_end(task: str, score: float, steps: int) -> None:
-    print(f"[END] task={task} score={score:.2f} steps={steps}", flush=True)
+    print(f"[END] task={task} score={score} steps={steps}", flush=True)
 
 class DefWrapper(BaseModel):
     reasoning: str
