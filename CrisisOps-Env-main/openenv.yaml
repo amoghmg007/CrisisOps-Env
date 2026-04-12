@@ -1,0 +1,20 @@
+name: crisisops-env
+description: Multi-agent cybersecurity crisis simulation
+entry_point: env:CrisisOpsEnv
+
+tasks:
+  - name: reconnaissance
+    description: Detect and identify early network threats while maintaining system integrity.
+    grader: grade_reconnaissance
+
+  - name: lateral_movement
+    description: Prevent attackers from spreading across the network through active defense and threat monitoring.
+    grader: grade_lateral_movement
+
+  - name: data_exfiltration
+    description: Protect sensitive data and maintain system uptime during peak attack volume.
+    grader: grade_data_exfiltration
+
+  - name: incident_response
+    description: Restore system functionality and integrity through rapid patching and resource stabilization.
+    grader: grade_incident_response
